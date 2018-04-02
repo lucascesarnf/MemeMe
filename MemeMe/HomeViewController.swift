@@ -90,6 +90,7 @@ class HomeViewController: UIViewController {
     @IBAction func editAction(_ sender: Any) {
         // I will implement this function in the next version of this code
         let alert = UIAlertController(title: "For now, this is not working.", message: "This functionality will be available on the next version.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
         self.present(alert, animated: true)
     }
     
