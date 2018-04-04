@@ -56,7 +56,8 @@ class HomeViewController: UIViewController {
         subscribeToKeyboardNotifications()
         closedMenuConstraintsUpdate()
         topView.isHidden = true
-        configureTextFields()
+        configureTextField(textField: topTextField, text: "TOP TEXT HERE")
+        configureTextField(textField: bottomTextField, text: "BOTTOM TEXT HERE")
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -101,26 +102,31 @@ class HomeViewController: UIViewController {
     }
     
     @IBAction func shareAction(_ sender: Any) {
-        // let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imageView.image!, memedImage: generateMemedImage())
         
         let activityViewController = UIActivityViewController(activityItems: [generateMemedImage()], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = self.view // so that iPads won't crash
         // present the view controller
         self.present(activityViewController, animated: true, completion: nil)
+        activityViewController.completionWithItemsHandler = { (activityType, completed: Bool, returnedItems: [Any]?, error: Error?) in
+            if completed {
+                let _ = Meme(topText: self.topTextField.text!, bottomText: self.bottomTextField.text!, originalImage: self.imageView.image!, memedImage: self.generateMemedImage())
+            }
+        }
     }
     
     @IBAction func cameraAction(_ sender: Any) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .camera
-        present(imagePicker, animated: true, completion: nil)
+        openPicker(sourceType: .camera)
     }
     
     @IBAction func photoAction(_ sender: Any) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        present(imagePicker, animated: true, completion: nil)
+        openPicker(sourceType: .photoLibrary)
+    }
+    
+    func openPicker(sourceType: UIImagePickerControllerSourceType) {
+        let pickerController = UIImagePickerController()
+        pickerController.delegate = self
+        pickerController.sourceType = sourceType
+        present(pickerController, animated: true, completion: nil)
     }
 }
 
@@ -174,23 +180,17 @@ extension HomeViewController: UITextFieldDelegate  {
     
     
     //Here we configure the textField Types
-    private func configureTextFields() {
-        
+    private func configureTextField(textField: UITextField, text: String) {
         let memeTextAttributes:[String:Any] = [
             NSAttributedStringKey.strokeColor.rawValue: UIColor.black,
             NSAttributedStringKey.foregroundColor.rawValue: UIColor.white,
             NSAttributedStringKey.font.rawValue: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
             NSAttributedStringKey.strokeWidth.rawValue: -4.5]
         
-        topTextField.delegate = self
-        topTextField.defaultTextAttributes = memeTextAttributes
-        topTextField.textAlignment = .center
-        topTextField.text = "TOP TEXT HERE"
-        
-        bottomTextField.delegate = self
-        bottomTextField.defaultTextAttributes = memeTextAttributes
-        bottomTextField.textAlignment = .center
-        bottomTextField.text = "BOTTOM TEXT HERE"
+        textField.delegate = self
+        textField.defaultTextAttributes = memeTextAttributes
+        textField.textAlignment = .center
+        textField.text = text
     }
     
 }
@@ -198,14 +198,7 @@ extension HomeViewController: UITextFieldDelegate  {
 // MARK: - GenerateMeMe
 
 extension HomeViewController {
-    //This is mine Meme Struct
-    struct Meme {
-        let topText: String
-        let bottomText: String
-        let originalImage: UIImage
-        let memedImage: UIImage
-    }
-    
+
     //Here i generate the meme image
     func generateMemedImage() -> UIImage {
         alphaButtons(alpha: 0)
